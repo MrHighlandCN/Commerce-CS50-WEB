@@ -1,0 +1,125 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<div class="container">
+
+    <!-- Alert  -->
+    {% if alert == "successful_bid" and is_alert %}
+        <div class="alert alert-success" role="alert">
+            Successful bid
+        </div>
+    {% elif alert == "failed_bid" and is_alert %}
+        <div class="alert alert-danger" role="alert">
+            Failed bid
+        </div>
+    {% elif alert == "successful_close" and is_alert %}
+        <div class="alert alert-success" role="alert">
+            Successful close
+        </div>
+    {% elif alert == "winner_alert" and is_alert %}
+        <div class="alert alert-success" role="alert">
+            You are the winner
+        </div>
+    {% endif %}
+    <!-- End alert -->
+
+
+    <!-- Add and remove object to/from watchlist & Close auction if user == owner-->
+    {% if user.is_authenticated %}
+    <form action="{% url 'add_remove_watchlist' auction.id %}" method="post">
+        {% csrf_token %}
+        {% if is_in_watchlist %}
+        <button type="submit" class="btn btn-primary mt-2" name="button" value="remove">Remove from watchlist</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary mt-2" name="button" value="add">Add to watchlist</button>
+        {% endif %}
+    </form>
+    <!-- End add and remove -->
+
+    <!-- Button for closing auction -->
+    <form action="{% url 'close' auction.id %}" method="post">
+        {% csrf_token %}
+        {% if user == auction.owner %}
+        <button type="submit" class="btn btn-danger mt-2" name="button" value="close">Close</button>
+        {% endif %}
+    </form>
+    <!-- End close -->
+    {% endif %}
+
+    <h2>{{auction.title}}</h2>
+    <img src="{{auction.imageURL}}" alt="{{auction.title}} image" class="rounded img-fluid">
+    <p class="mt-4">{{auction.description}}</p>
+
+    <!-- Display current bid -->
+    {% if auction.current_bid != 0 %}
+    <h4 class="text-success font-weight-bold">{{auction.current_bid}} VP</h4>
+    {% else %}
+    <h4 class="text-success font-weight-bold">{{auction.starting_bid}} VP</h4>
+    {% endif %}
+    <!-- End display -->
+    <!-- BID FORM -->
+    {% if user.is_authenticated %}
+    <p>{{auction.num_of_bid}} bid(s) so far. Your bid is the current bid: </p>
+    <form action="{% url 'bid' auction.id %}" method="post">
+        {% csrf_token %}
+        {{ bid_form }}
+        <button type="submit" class="btn btn-primary mt-2">Bid</button>
+    </form>
+    {% endif %}
+    <!-- END BID FORM -->
+    <h6 class="mt-4">Details:</h6>
+    <ul class="list-group">
+        <li class="list-group-item">Listed by: {{auction.owner}}</li>
+
+        {% if auction.category %}
+        <li class="list-group-item">Category: {{auction.get_category_display}}</li>
+        {% else %}
+        <li class="list-group-item">Category: No category listed</li>
+        {% endif %}
+    </ul>
+
+    <!-- COMMENT SECTION -->
+    {% if user.is_authenticated %}
+    <div class="row d-flex justify-content-center mt-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-0 border" style="background-color: #f0f2f5;">
+                <div class="card-body p-4">
+                    <!-- COMMENT FORM -->
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <form action="{% url 'comment' auction.id%}" method="post">
+                            {% csrf_token %}
+                            <label class="form-label font-weight-bold" for="addANote">Add your comment:</label>
+                            <input type="text" id="addANote" class="form-control" placeholder="Type comment..." name="comment"/>
+                            <button type="submit" class="btn btn-primary mt-2 ">Post</button>
+                        </form>
+                    </div>
+                    <!-- END COMMENT FORM -->
+                    <!-- Display all cmt -->
+                    {% for comment in comments %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p>{{comment.content}}</p>
+
+                            <div class="d-flex justify-content-between">
+                                <div class="d-flex flex-row align-items-center">
+                                    <img src="https://th.bing.com/th/id/OIP.RJHoTYI8wI7PtFxNzWXbwAHaHa?rs=1&pid=ImgDetMain" alt="avatar"
+                                        width="25" height="25" class="rounded-5"/>
+                                    <p class="small mb-0 ms-2">{{comment.user.username}}</p>
+
+                                </div>
+                                <span class="text-secondary">{{comment.timestamp}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- end display -->
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- END COMMENT SECTION -->
+</div>
+
+{% endblock %}
