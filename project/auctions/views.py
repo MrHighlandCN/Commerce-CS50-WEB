@@ -152,7 +152,7 @@ def view_page(request, auction_id):
                     "comment_form": commentForm(),
                     "alert": "winner_alert",
                     "is_alert": True,
-                    "comments": Comment.objects.all(),
+                    "comments": Comment.objects.filter(auction=auction),
                 })
 
     else:
@@ -163,7 +163,7 @@ def view_page(request, auction_id):
         "bid_form": bidForm(),
         "comment_form": commentForm(),
         "is_alert": False,
-        "comments": Comment.objects.all(),
+        "comments": Comment.objects.filter(auction=auction),
     })
 
 
@@ -217,7 +217,7 @@ def bid(request, auction_id):
                     "comment_form": commentForm(),
                     "alert": "successful_bid",
                     "is_alert": True,
-                    "comments": Comment.objects.all()
+                    "comments": Comment.objects.filter(auction=auction)
                 })
             else:
                 return render(request, "auctions/view_page.html", {
@@ -226,7 +226,7 @@ def bid(request, auction_id):
                     "comment_form": commentForm(),
                     "alert": "failed_bid",
                     "is_alert": True,
-                    "comments": Comment.objects.all()
+                    "comments": Comment.objects.filter(auction=auction)
                 })
     return HttpResponseRedirect(reverse("viewpage", kwargs={
         "auction_id": auction_id
@@ -251,7 +251,7 @@ def close(request, auction_id):
                 "comment_form": commentForm(),
                 "alert": "successful_close",
                 "is_alert": True,
-                "comments": Comment.objects.all(),
+                "comments": Comment.objects.filter(auction=auction),
             })
     return HttpResponseRedirect(reverse("viewpage", kwargs={
         "auction_id": auction_id
@@ -269,7 +269,7 @@ def comment(request, auction_id):
                 "bid_form": bidForm(),
                 "comment_form": commentForm(),
                 "is_alert": False,
-                "comments": Comment.objects.all()
+                "comments": Comment.objects.filter(auction=auction)
             })
 def category(request):
     if request.method == "POST":
